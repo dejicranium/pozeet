@@ -18,7 +18,6 @@ def upload_profile_picture(file, file_name, **options):
         ],
         tags = ['profile_pic'],
     )
-
     return uploaded_image
 
 def add_image_description(file, file_name, **options):
@@ -32,5 +31,4 @@ def add_image_description(file, file_name, **options):
         ],
         tags = ['description_img'],
     )
-
     return uploaded_image

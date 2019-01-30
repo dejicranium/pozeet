@@ -1,31 +1,32 @@
-\<template id='new-opinion-template' type='x/template'>
+<template id='new-opinion-template' type='x/template'>
 	<transition name='modal'>
 		<div class='modal-mask' v-show='show_opinion_modal' @click='closeModal'>
 			<div class='modal-container' @click.stop >
 				<div class='modal-header' style='color:black'>
-					<h3>New opinion</h3>
+					<p>New opinion</p>
 				</div>
-				
+
+			<div class='modal-body'>
 				<form id='opinion-form' enctype='multipart/form-data' method='post'>
-				<div class='modal-body new-opinion-modal-body' style="width:100%; box-sizing:border-box; padding-bottom:20px; padding-right:0px; padding-left:0px; padding-top:0px;">
-					<textarea style='width: 100%; height: 100px; border-radius:0px; font-size:13px; margin-bottom:5px;; ' v-model='opinion' id='comment-input' @click='autoResize' class='form-control final-input' name='comment' form='comment-form' placeholder='Have your say'></textarea>
+					<textarea style='width: 100%; border-radius:0px; font-size:13px; margin-bottom:5px;; ' v-model='opinion' id='comment-input' @click='autoResize' class='form-control final-input' name='comment' form='comment-form' placeholder='Have your say'></textarea>
 					
-          		<label @click='addOpinionImage' id='opinion-image-label'style='background-color:lightgrey; display:inline-block; padding:5px; border-radius:5px; margin-left:10px;'>
-				  <input type="file" style='display:none'
-               		id="opinion-image" name="opinion-image"
-					
-               		accept="image/png, image/jpeg" />
+					<div> 
+          			<label @click='addOpinionImage' id='opinion-image-label' style='background-color:lightgrey; display:inline-block; padding:5px; border-radius:5px; margin-left:10px;'>
+				
+					<input type="file" style='display:none'
+               		id="opinion-image" name="opinion-image" accept="image/png, image/jpeg"/>
 					<span><i class="far fa-image button-icon" ></i>Add image</span>
-					<img id='opinion-image-display'></img>					
+					<img id='opinion-image-display'>					
 
-				</label><br>
-
-				<button type='button' id='createOpinionButton' style='margin-bottom: 10px; border-radius:10px; margin-left:10px;margin-right:10px;' @click='createOpinion'>  <i class="fa fa-circle-o-notch fa-spin" v-if=''></i>Share</button>
-				</div> 
-
+					</label><br>
+					</div>
 				</form>
 
-			</div> 
+			</div>
+			<div class="modal-footer">
+				<button type='button' id='createOpinionButton' style='margin-bottom: 10px; border-radius:10px; margin-left:10px;margin-right:10px;' @click='createOpinion'>  <i class="fa fa-circle-o-notch fa-spin" ></i>Share</button>
+				</div> 
+			</div>
 
 		</div>
 	</transition>
@@ -90,9 +91,7 @@
 					var formData = new FormData(form);
 					formData.append('opinion', vm.opinion);
 					var request = new XMLHttpRequest();
-				
 					vm.changeButtonContent(event.target, '...');
-
 					request.open("POST", siteUrl + '/new/opinion');
 					request.onreadystatechange = function(){
 						if (request.readyState == XMLHttpRequest.DONE){
@@ -111,13 +110,9 @@
 					
 						}
 					}
-				
 					request.send(formData);
 				},
-		
 
-	
-	
 			closeModal(){
 				this.$emit('close_new_opinion_modal', true);
 
@@ -149,19 +144,63 @@
 </script>
 
 <style scoped>
+	.modal-container { 
+		height:90%;
+		display: flex;
+		align-items: stretch;
+		flex-direction: column;
+		padding-bottom: 10px;
+	}
+	.modal-container .modal-header{
+		height: 5%;
+	}
+
+	.modal-header p {
+		font-size: 12px;
+		font-weight: bold; 
+	}
 	.modal-container .modal-body{
-		position: relative;
-		padding-bottom: 20px;
+		display: flex; 
+		flex-direction: column;
+		width:100%;
+		height: 90%;
+		box-sizing:border-box;  
+		padding-right:0px; 
+		padding-left:0px; 
+		padding-top:0px;
 	}
+	.modal-body form {
+		height:100%;
+		display: flex;
+		flex-direction: column;
+		border: 0;
+	}
+	.modal-body form textarea{
+		height: 90%;
+	}
+	.modal-body label {
+		display: flex;
+		align-items: center;
+		background-color:whitesmoke;
+		padding: 5px; 
+		border-radius: 5px;
 
-	.modal-container .modal-body .final-input{
 	}
-	.modal-container .modal-body button{
-		position: absolute;
-		right: 0; 
-		bottom: 0;
-		margin-right: 20px; 
-	}
+	.modal-footer {
+		height: 5%;		
+		display: flex; 
+		justify-content: flex-end;
+		align-items: center;
+		padding: 2px;
 
+	}
+	.modal-footer button {
+		padding: 5px; 
+		border-radius: 5px;
+		background-color: teal;
+		color: white;
+		border: 0; 
+		text-align: center;
+	}
 
 </style>

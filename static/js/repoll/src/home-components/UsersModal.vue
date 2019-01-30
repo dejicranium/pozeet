@@ -1,101 +1,174 @@
-<template>
-    <div>
-        
-        <div class="container" :v-for="user in users" :user='user'>
-            <div class="image-container">
-               <img class="user-image" src="user.userPic"/>
-            </div>
+	<template id='respondents-template'>
+		<transition name='modal'>
+			<div class="modal-mask" v-show='show_users_modal' @click='closeModal'>
+				<div class="m-container" @click.stop>
+                    <div class="header">
+                        <div class="close-box">
+                            <p class="close-mark" @click="closeModal">x</p>
+                        </div>
+                    </div>
+					<div class="container" v-for="user in users">
+            			<div>
+                            <img src="/static/rename.svg" v-show="listLoading"/>
+                        </div>
+                        <div class="image">
+                			<img src="https://pbs.twimg.com/profile_images/1081905771028320256/yajLUZzZ_400x400.jpg"/>
+            			</div>
+            			<div class="detail">
+                			<div class="name">{{user.userName}}</div>
+                			<div class="username">{{user.username}}</div>
+            			</div>
+            			<div class="follow">
+                			<button class="button">Follow</button>
+            			</div>
+        			</div>
+				</div>
+			</div>
+		</transition>
+	</template>
 
-            <div class="user-details-container">
-                <p class='userFullName'>{{user.userFullName}} <br> <span class="username">{{user.username}}</span>
-                    <br>
-                    <span class="bio">
-                        {{user.bio}}
-                    </span>
-                 </p>
-            </div>
-
-            <div class="follow-btn-container">
-                <button>Follow</button>
-            </div>
-
-        </div>
-
-    </div> 
-
-
-</template>
 
 <script>
-export default {
-    name: 'UsersModal',
-    props: ['users']
-}
+    var siteUrl = 'http://localhost:6543'
+    import axios from 'axios';
+
+	export default {
+		name: 'UsersModal', 
+		props: ['show_users_modal', 'url_to_load'],
+
+		data(){
+			return{	
+                users: [],
+                listLoading: false,
+			}
+        },
+        methods: {
+            closeModal(){
+                this.$emit('act_close_users_modal', false);
+            }
+        },
+		watch:{
+			show_users_modal: function(val){
+				if (val == true){
+                    var vm = this;
+                    vm.listLoading = true;
+					axios.get(siteUrl + vm.url_to_load, {
+					}).then(response=>{
+                        vm.users = response.data;
+                        vm.listLoading = false;
+					});
+                }
+                else {
+                    //clear the users' list
+                    this.users = [];
+                }
+            },
+            
+		},
+
+		
+	}
+
 </script>
-
-
 <style scoped>
-div{ 
-    max-height: 50px;
-    border: grey 0.5px solid;
-    vertical-align: middle;
-}
-.container{ 
-    background-color: whitesmoke;
-    padding: 16px; 
-    display: flex; 
-    flex-direction: row; 
-    -ms-flex-direction: row;
-    
+        .modal-mask {
+            display: flex;
+            justify-content: center;
+            align-items: center;
 
-}
-.image-container{
-    margin-right: 5px;
-    flex-basis: 25%;
-}
+        }
+        .m-container {
+            width: 240px;
+            box-sizing: border-box;
+            padding: 0;
+            background-color: white; 
+            flex-direction: column;
+            -ms-flex-direction: column;
+            justify-content: stretch;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            max-height: calc(100% - 40px);
+            overflow-y: scroll;
+            margin: auto;
+        }
+        .header {
+            border-bottom: 1px solid lightgrey;
+            padding: 10px 5px; 
+            display: flex; 
+            justify-content: flex-end;
 
-.user-image{
-    border-radius: 50%; 
-    width: 18px; 
-    height: 18px; 
-    text-align: center;
-}
+        }
+        .close-box {
+            display: flex;
+            justify-content: center;
+            box-sizing: border-box;
+            padding-right: 5px;
+        }
+        .close-mark {
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: darkgrey;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            box-sizing: border-box;
 
-.user-details-container{
-    display: flex; 
-    flex-direction: column;
-    margin-right: 5px;
-    -ms-flex-direction: column;
-    flex-basis: 70%;
-    
+            -ms-flex-direction: row;
+            align-items: stretch;
+            padding: 5px 5px;
+            justify-content: center;
+        }
+        .image {
+            align-items: center;
+            justify-content: center;
+            padding: 5px 5px;
+        }
+        .image img {
+            max-width: 44px;
+            max-height: 44px;
+            border-radius: 50%;
+        }
 
-}
-
-.userFullName{
-    font-weight: bold; 
-}
-
-.username{
-    font-weight: normal;
-    color:bold;
-    height: 15px; 
-    margin: auto auto;
-}
-
-.follow-btn-container{
-    
-    flex-basis: 15%;
-}
-
-button{ 
-    background-color: teal;
-    border: 0;
-    border-radius: 5px;
-    color: white;
-    text-align: center;
-    height: 30px;
-    margin: auto auto;
-}
-
+        .detail {
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            padding: 5px 5px;
+            font-size: 14px;
+            width: 100px;
+        }
+        .detail :first-child {
+            font-weight: bold;
+        }
+        .detail div {
+            overflow-x: hidden;
+            overflow-y: hidden;
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+            -o-text-overflow: ellipsis;
+        }
+        .detail .name {
+            text-overflow: ellipsis;
+            -ms-text-overflow: ellipsis;
+            -o-text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .detail .username {
+            color: darkgrey;
+        }
+        .follow {
+            padding: 5px 5px;
+            display: flex;
+            align-items: center;
+        }
+        .follow button {
+            border: 0; 
+            border-radius: 3px; 
+            padding: 8px 8px;
+            background-color: teal;
+            color: white;
+        }
+        
 </style>
-

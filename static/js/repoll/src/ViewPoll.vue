@@ -141,7 +141,7 @@
 					</template> 
 
 					<div style='display:flex; flex-direction="row"'>
-                    	<p class="votes" @click=''>{{poll.totalVotes}} votes </p>
+                    	<p class="votes">{{poll.totalVotes}} votes </p>
                     <p class="votes" style="color:darkgrey;cursor:pointer;"> {{poll.timeRemaining}}</p>
 					
 					</div>
@@ -179,7 +179,7 @@
 					 :id='option.id'
 					 onclick="showTabContent(this, 'opinions')" 
 					 @click='makeTabActive(option.id)'
-					 class="tab">
+					 >
 					 
                     <p>{{option.option}}</p>
                 </div>
@@ -471,7 +471,6 @@
 
 			},
 
-
 			userHasVoted(){
 				return this.poll.userHasVoted;
 			},
@@ -496,7 +495,6 @@
 			numOfLikes(){
 				return this.poll.numOfLikes;
 			},
-
 
 		},
 

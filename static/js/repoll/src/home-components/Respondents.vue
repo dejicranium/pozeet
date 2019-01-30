@@ -2,22 +2,20 @@
 		<transition name='modal'>
 			<div class="modal-mask" v-show='show_respondents_modal'>
 				<div class="modal-container">
-					<div class="modal-header">
-
-
-					</div>
-					<div class="modal-body">
-						<div class="card" v-for='respondent in respondents'>
-							<img v-if='respondent.userPic' :src='userPic'/>
-								<p>{{respondent.userFullName}}</p>
-								<p>{{respondent.userName}}</p>
-							<button> Follow</button>
-
-						</div>
-					</div>
+					<div class="container">
+            			<div class="image">
+                			<img src="https://pbs.twimg.com/profile_images/1081905771028320256/yajLUZzZ_400x400.jpg"/>
+            			</div>
+            			<div class="detail">
+                			<div class="name">{{user.userName}}</div>
+                			<div class="username">{{user.username}}</>
+            			</div>
+            			<div class="follow">
+                			<button class="button">Follow</button>
+            			</div>
+        			</div>
 				</div>
 			</div>
-		
 		</transition>
 	</template>
 
@@ -27,7 +25,7 @@
 
 	export default {
 		name: 'Respondents', 
-		props: ['show_respondents_modal', 'activity'],
+		props: ['show_respondents_modalaa', 'activity'],
 
 		data(){
 			return{	
@@ -40,7 +38,7 @@
 					axios.get(siteUrl + '/voters/' + this.activity.id, {
 
 					}).then(response=>{
-					this.respondents = response.data;
+						this.respondents = response.data;
 					});
 				}
 			},

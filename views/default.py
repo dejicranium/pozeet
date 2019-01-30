@@ -37,10 +37,6 @@ def get_followers_posts(request, user_id):
 
     return polls
 
-
-
-
-
 def get_subscriptions(request, user):
     subscriptions = []
     for s in user.subscriptions:
@@ -64,7 +60,7 @@ def get_subscribed_posts(request, user):
             relevant_polls.append(p.polls)
     return relevant_polls
 
-
+"""
 @view_config(route_name='home', renderer='../templates/mytemplate.jinja2')
 def homepage_view(request):
     polls = request.dbsession.query(Poll)
@@ -96,6 +92,7 @@ def homepage_view(request):
             'auth_user':auth_user}
 
 
+"""
 """
 @view_config(route_name='home',
     renderer='../templates/mytemplate_mobile.jinja2', user_agent='mobile')

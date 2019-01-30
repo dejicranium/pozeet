@@ -78,23 +78,24 @@ def verify_first(request):
 
 @view_config(route_name='xhr_register', renderer='json')
 def register_through_xhr(request):
-    req_body = request.params
-    first_name = req_body.get('firstName')
-    last_name = req_body.get('lastName')
-    username = req_body.get('username')
-    password = request.params.get('password')
-    email = req_body.get('email')
-    phone = req_body.get('phone')
-    sex = req_body.get('sex')
-    birth_date = req_body.get('birthDate')
-    birth_month = req_body.get('birthMonth')
-    birth_year = req_body.get('birthYear')
-    country = req_body.get('country')
-    sub_unit = req_body.get('subUnit')
-
-    profile_pic = req_body.get('profilePic', None)
-    categories = req_body.get('categories', None)
-
+    try:
+        req_body = request.params
+        first_name = req_body.get('firstName')
+        last_name = req_body.get('lastName')
+        username = req_body.get('username')
+        password = req_body.get('password')
+        email = req_body.get('email')
+        phone = req_body.get('phone')
+        sex = req_body.get('sex')
+        birth_date = req_body.get('birthDate')
+        birth_month = req_body.get('birthMonth')
+        birth_year = req_body.get('birthYear')
+        country = req_body.get('country')
+        sub_unit = req_body.get('subUnit')
+        profile_pic = req_body.get('profilePic', None)
+        categories = req_body.get('categories', None)
+    except:
+        return {'status': 'fail'}
         
     categories_list = categories.split(',')
     category_subs = []
@@ -104,7 +105,6 @@ def register_through_xhr(request):
         new_user.first_name = first_name
         new_user.last_name = last_name
         new_user.email = email
-     
         new_user.set_password(password)
         new_user.username = username
         new_user.phone_number = str(phone)
@@ -134,7 +134,7 @@ def register_through_xhr(request):
             new_sub.user_id = new_user.id
 
             new_user.subscriptions.append(new_sub)
-                #redis
+            #redis
             redis_category_subscription = CategorySubscription(int(category))
             redis_category_subscription.add_subscriber(new_user.id)
 

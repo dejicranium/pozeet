@@ -10,13 +10,13 @@ Vue.mixin({
      },
    
      showSnackbar: text => {
-         var snackbar = document.getElementById('snackbar');
-         snackbar.innerHTML = text;
+         //var snackbar = document.getElementById('snackbar');
+         //snackbar.innerHTML = text;
    
-         snackbar.className = "show";
+         //snackbar.className = "show";
    
        // After 3 seconds, remove the show class from DIV
-         setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 4000);
+         //setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 4000);
    
      }
  
@@ -25,7 +25,7 @@ Vue.mixin({
   });
  
  new Vue({
-   el: '#body-container',
+   el: '#container',
    render: h => h(Trending),
  })
  

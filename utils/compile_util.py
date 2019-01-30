@@ -1,4 +1,4 @@
-from ..models.main_models import Share, Reply
+from ..models.main_models import Share, Reply, Category
 from .scraper_util import get_first_url, url_exists, get_page_thumb_title_desc, get_page_desc, get_page_thumb
 
 def return_polls_voted_in(request, user):
@@ -27,10 +27,12 @@ def return_opinions_voted_in(request, user):
 def return_categories_subscribed_to(request, user):
 	if not request.user:
 		return []
-	subscriptions = []
-	for subscription in user.subscriptions:
-		subscriptions.append(subscription.id)
-	return subscriptions
+	user_categories = []
+	for each in user.subscriptions:
+		categories = request.dbsession.query(Category).filter_by(id=each.category_id).all()
+		for category in categories:
+			user_categories.append(category.id)
+	return user_categories
 	
 def return_polls_results_seen_by_user(request, user):
 	if not request.user:
@@ -40,7 +42,6 @@ def return_polls_results_seen_by_user(request, user):
 		for poll in user.polls_seen_results:
 			seen_results.append(int(poll.poll_id))
 	return seen_results
-
 
 def return_comments_shared(request, user):
 	if not request.user:
@@ -70,6 +71,7 @@ def compile_reply_details(request, reply, user, recursive_replies=False, upward_
                 'type': 'reply',
 				'conversationId': reply.conversation_id,
                 'userName': reply.added_by.full_name,
+				'username': reply.added_by.username,
                 'userPic': reply.added_by.profile_picture,
 				'userId': reply.added_by.id,
 				'userSlug': reply.added_by.slug,
@@ -113,7 +115,8 @@ def compile_poll_details(request, poll, user):
     dictt = {
         'type': 'poll', 
         'id': poll.id, 
-        'userName': poll.added_by.full_name, 
+        'userName': poll.added_by.full_name,
+		'username': poll.added_by.username, 
 		'userId': poll.added_by.id,
         'userPic': poll.added_by.profile_picture, 
         'imageInfo': poll.info_image_link,
@@ -157,6 +160,7 @@ def compile_opinion_details(request, opinion, user):
 	    'id':  opinion.id,
 		'type': 'opinion',
 		'userName': opinion.added_by.full_name,
+		'username': opinion.added_by.username,
 		'userPic': opinion.added_by.profile_picture,
 		'opinion': opinion.opinion,
 		'options': [
@@ -203,12 +207,13 @@ def compile_comment_details(request, comment, user):
             'type': 'comment',
             'comment_id': comment.id,
             'userId': comment.added_by.id,
+			'username': comment.added_by.username,
             'commenterInitals': comment.added_by.initials,
-                'commenter': comment.added_by.full_name,
-                'comment': comment.comment,
-                'numOfReplies': comment.num_of_replies,
-                'option_chosen': comment.option.title,
-				'timeAdded': comment.time_added,         
+            'commenter': comment.added_by.full_name,
+            'comment': comment.comment,
+            'numOfReplies': comment.num_of_replies,
+            'option_chosen': comment.option.title,
+			'timeAdded': comment.time_added,         
     }
 	
 	if object_is_poll:
@@ -219,4 +224,6 @@ def compile_comment_details(request, comment, user):
 		opinion = comment.opinion
 		comment_dictt['opinion'] = compile_opinion_details(request, opinion, user)
 	
+	if request.user: 
+		comment_dictt['hasSharedComment'] = comment.id in return_comments_shared(request, user)
 	return comment_dictt

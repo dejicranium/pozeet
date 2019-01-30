@@ -137,9 +137,7 @@ def reply_to_opinion(request):
     #add activity
         new_activity = ActivityService(request, 'reply', request.user, new_reply, opinion)
         new_activity.create_new_activity()
-
         transaction.commit()
-    
         request.response.status = '200'
         return {'status': 'success'}
     except:

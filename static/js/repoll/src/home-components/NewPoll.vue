@@ -56,8 +56,7 @@
 											:placeholder='option.placeholder' 
 										v-model='option.text'/>								
 									</div>
-
-									<p type='' @click='addNewOption' style='position:relative; left: 0; color:teal;height:30px;font-weight:bold;' > + Add Option</p>
+									<span class="selectBtn" @click="addNewOption">New Option</span>
 								</div>
 							</div>						
 						
@@ -78,13 +77,12 @@
 								</div>
 
 								<div style='padding:5px 16px;'>	
-									<label for='category' class='form-label' style='font-size:12px;'> Publish to: <span class='required'>*</span> </label>
+									<label for='category' class='form-label' style='font-size:12px;'> Publish to (max: 2): <span class='required'>*</span> <span class='expand' v-show="!expandCategories" @click="showCategories">Select Categories</span> </label>
 
-									<div class='categories-selection'>
-										<label v-for='category in categories' :category='category' @click='chooseCategory(category.categoryId)'>
-										<input type='checkbox' value='category.categoryId'/> {{category.categoryName}}
-										<span class='checkmark'></span>
-
+									<div class='categories-selection' v-if='expandCategories'>
+										<label v-for='category in categories' :category='category' @click='chooseCategory(category.categoryId, $event)'>
+											<input disabled type='checkbox' :id="'checkbox_category_' + category.categoryId" :value='category.categoryId' @click.stop /> {{category.categoryName}}
+											<span class='checkmark' @click.stop></span>
 										</label>
 									</div>
 								
@@ -160,12 +158,12 @@
 							
 
 								<div style='padding:5px 16px;'>	
-									<label for='category' class='form-label' style='font-size:12px;'> Publish to: <span class='required'>*</span> </label>
+									<label for='category' class='form-label' style='font-size:12px;'> Publish to (max: 2): <span class='required'>*</span> <span class='expand' v-show="!expandCategories" @click="showCategories">Select Categories</span> </label>
 
-									<div class='categories-selection'>
-										<label v-for='category in categories' :category='category' @click='chooseCategory(category.categoryId)'>
-										<input type='checkbox' value='category.categoryId'/> {{category.categoryName}}
-										<span class='checkmark'></span>
+									<div class='categories-selection' v-if='expandCategories'>
+										<label v-for='category in categories' :category='category' @click='chooseCategory(category.categoryId, $event)'>
+										<input disabled type='checkbox' :id="'checkbox_category_' + category.categoryId" :value='category.categoryId' @click.stop/> {{category.categoryName}}
+										<span class='checkmark' @click.stop></span>
 
 										</label>
 									</div>
@@ -218,24 +216,33 @@
 					placeholder: 'B',
 				}
 				],
+				//determines whether to show the categories that can be selected
+				expandCategories: false,
 				toChoosePollType: false,
 				pollType: 'normal',
 				finalChosenCategories: '',
 				finalChosenOptions: '',
 				chosenCategories: [],
-				totalNumOfOptionsChosen: false, 
 
+			}
+		},
+		watch: {
+			show_new_poll_modal: function(newValue){
+				if (newValue == false){
+					//close the categories to be expanded
+					this.expandCategories = false;
+				}
 			}
 		},
 
 		computed:{
 			allowedCategories(){
-				if (this.totalNumOfOptionsChosen == true){
-					var allowed = []
+				if (this.chosenCategories.length == 2){
+					var allowed = [];
 					for (let i = 0; i < this.chosenCategories.length; i++){
-						var category = this.chosenCategories[i];
-						var cate = this.categories.filter(c=>c.categoryId==category);
-						allowed.push(cate[0]);
+						var categoryId = this.chosenCategories[i];
+						var cate = this.categories.filter(c=>c.categoryId==categoryId)[0];
+						allowed.push(cate);
 					}
 
 					return allowed;
@@ -246,6 +253,11 @@
 		},
 
 		methods: {
+			//show categories to choose while creating a new poll
+			showCategories(){
+				this.expandCategories = true;
+			},
+
 			triggerListener(classKey){
 				var inputButton = document.getElementById('image-button-' + classKey);
 				var inputDisplay = document.getElementById('image-display-' +classKey);
@@ -405,16 +417,26 @@
 			},
 
 
-			chooseCategory(categoryId){
-				if (this.chosenCategories.length < 2){
+			chooseCategory(categoryId, event){
+				/**first of all, check whether the category has already been checked
+				if the category has already been checked, remove it from the list **/
+				 for (let i = 0; i < this.chosenCategories.length; i++){
+				//if the category has already been checked, remove it from the list
+					if (this.chosenCategories[i] == categoryId){
+						let categoryIndex = this.chosenCategories.indexOf(categoryId);
+						this.chosenCategories.splice(categoryIndex);
+						document.getElementById('checkbox_category_' + categoryId).checked = false;
+
+						return 0;
+					}
+				}
+				
+				//else, if it not there already, then just add it.
+				if (this.chosenCategories.length < 2 ){
 					this.chosenCategories.push(categoryId);
-					var unique = new Set(this.chosenCategories);
-					this.chosenCategories = Array.from(unique);
-				}
-				if (this.chosenCategories.length == 2){
-					//get the category that was inserted
-					this.totalNumOfOptionsChosen = true;
-				}
+					document.getElementById('checkbox_category_' + categoryId).checked = true;
+				}	
+
 			},
 
 			closeModal(){
@@ -448,5 +470,23 @@
 		right: 0; 
 		bottom: 0;
 		margin-right: 20px; 
+	}
+	.optionLabel {
+		text-align: center;
+	}
+	.expand {
+		background-color: whitesmoke;
+		padding: 5px;
+	}
+	.selectBtn {
+		background-color: lightgrey;
+		padding: 5px;
+		cursor: pointer;
+	}
+	.categories-selection {
+		display: flex; 
+		flex-wrap: wrap;
+		justify-content: stretch; 
+		width: 100%;
 	}
 </style>

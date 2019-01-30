@@ -1,16 +1,13 @@
 from pyramid.view import view_config
 from ..models.main_models import *
-from ..utils.compile_util import compile_poll_details
+from ..utils.compile_util import compile_poll_details, return_categories_subscribed_to
 from greggo.storage.redis.category_subscription import *
+import transaction
 
-def user_is_subscribed(user, category_id):
-	user_is_subscribed = False
-	for subscription in user.subscriptions: 
-		if subscription.category_id == category_id:
-			user_is_subscribed = True
-			break
-
-	return user_is_subscribed
+def user_is_subscribed(request, user, category_id):
+	user = request.dbsession.query(User).filter(User.id==request.user.id).first()
+	subscriptions = return_categories_subscribed_to(request, user)
+	return category_id in subscriptions
 
 @view_config(route_name='subscribe_to_category', renderer='json')
 def subscribe_to_category(request):
@@ -25,11 +22,18 @@ def subscribe_to_category(request):
 	request.dbsession.add(new_subscription)
 	return {"state": "success"}
 
+@view_config(route_name="unsubscribe_from_category", renderer="json")
+def unsubscribe_from_category(request):
+	category_id = int(request.matchdict.get('category_id', -1))
+	user = request.dbsession.query(User).filter(User.id==request.user.id).first()
+	#get subscription
+	subscription = request.dbsession.query(CategorySubscriber).filter(CategorySubscriber.category_id==category_id, CategorySubscriber.user_id==user.id)
+	subscription.delete()
+	transaction.commit()
+
 
 @view_config(route_name='show_subscriptions', renderer='json')
-def show_subscriptions(request):
-	
-	
+def show_subscriptions(request):	
 	user_id = request.user.id
 	#get logged in user
 	user = request.dbsession.query(User).filter(User.id==user_id).first()
@@ -45,7 +49,6 @@ def show_subscriptions(request):
 			dictt['categoryId'] = category.id
 			dictt['categoryName'] = category.category_name
 			subscriptions_dictt['subscriptions'].append(dictt)
-
 	return subscriptions_dictt		
 
 
@@ -73,12 +76,14 @@ def get_polls_from_category(request):
 	category_polls = {'activities': [], 'userLoggedIn': False, 'userName': ''}
 	user = None
 	category_id = request.matchdict.get('category_id', None)
+	#this is so important
+	category_id = int(category_id)
 
 	if request.user: 
 		user = request.dbsession.query(User).filter(User.id==request.user.id).first()
 		category_polls['userLoggedIn'] = True
 		category_polls['userName'] = user.full_name
-	
+		category_polls['userIsSubscribed'] = category_id in return_categories_subscribed_to(request, user)
 	else: 
 		category_polls['userLoggedIn'] = False
 
@@ -97,7 +102,7 @@ def category_polls_page(request):
 	category = request.dbsession.query(Category).filter(Category.id==category_id).first()
 	if request.user:
 		user = request.dbsession.query(User).filter(User.id==request.user.id).first()
-		subscribed = user_is_subscribed(user, category.id)
+		subscribed = user_is_subscribed(request, user, category.id)
 		return {'user': user, 'category': category, 'user_is_subscribed': subscribed}
 	return {'user': None, 'category': category}
 

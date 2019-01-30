@@ -2,7 +2,7 @@ import Vue from 'vue'
 import ViewOpinion from './ViewOpinion.vue'
 import axios from 'axios'
 
-
+Vue.config.devtools = true
 Vue.mixin({ 
     methods:{
       changeButtonContent: (button, text) => {

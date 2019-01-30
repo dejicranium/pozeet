@@ -13,9 +13,6 @@
 					<div :id='[intent=="register" ? "selected-tab" : "t"]' @click='intent="register"'>Register</div>
 				</div>
 
-					
-
-
 				<div class="modal-body">
 					
 					<div class='login' v-if="intent=='login'">
@@ -40,8 +37,7 @@
 					<div class='register' v-else>
 							<p class='required' v-show='registrationError'>{{registrationErrorText}}</p>
 						
-						
-						<form id='register-form' name='register-form' enctype="multipart/form-data">
+							<form id='register-form' name='register-form' enctype="multipart/form-data">
 							<div class='first-stage' v-if='registerStage == "first"'>
 								<div class='name-div'>
 									<div class='first-name-div' >
@@ -137,22 +133,22 @@
 
 						</div>
 					
-						<div class='second-stage' v-if="registerStage =='third'">
+						<div class='third-stage' v-if="registerStage =='third'">
 							<label class='form-label' style='font-weight:bold;margin-bottom:10px;'>Subscribe to (at least 10): </label>
 							<div class='registration-categories-selection' style='margin-top:10px;'>
 								<label v-for='category in categories' :category='category' @click='toggleChooseCategory(category.categoryId)'>
-									<input type='checkbox' value='category.categoryId'/> {{category.categoryName}}
-									<span class='checkmark'></span>
+									<input type='checkbox' value='category.categoryId' @click.stop/> {{category.categoryName}}
+									<span class='checkmark' @click.stop></span>
+								</label>
 
-							</label>
-
+							</div>
+							<div class="proceed-container">
+								<button type='button' @click='nextRegistrationStage'>Proceed</button>
+							</div>
 						</div>
-						<button type='button' @click='nextRegistrationStage'>Proceed</button>
-
-					</div>
 
 
-					<div class='second-stage' v-if="registerStage =='fourth'" style='display:flex; flex-direction: column; text-align:center'>
+					<div class='final-stage' v-if="registerStage =='fourth'" style='display:flex; flex-direction: column; text-align:center'>
 						<span style='color: teal; font-size: 14px; margin-bottom:5px;'>Choose Profile Picture</span>
 						
 						<div style='text-align:center;'>
@@ -162,7 +158,7 @@
                				accept="image/png, image/jpeg" />
 
 						</div>
-						<button type='button' @click='completeRegistration' > <i class="fa fa-circle-o-notch fa-spin" v-if=''></i>Register</button>
+						<button class="proceed-btn" type='button' @click='completeRegistration' > <i class="fa fa-circle-o-notch fa-spin" v-if=''></i>Register</button>
 
 					</div>
 					</form>
@@ -239,7 +235,16 @@
 		methods:{
 
 			toggleChooseCategory(id){
-				this.chosenCategories.push(id);
+				//check if the category is already there
+				var category = this.chosenCategories.filter(element=>element == id)[0];
+				if (category){
+					//get the index, so we can remove it from the item.
+					var categoryIndex = this.chosenCategories.indexOf(id);
+					this.chosenCategories.splice(categoryIndex);
+				}
+				else{
+					this.chosenCategories.push(id);
+				}
 			},
 
 			flattenCategories(){
@@ -301,25 +306,25 @@
 						this.registrationErrorText = "Username must be more than 2 characters"
 					}
 
-
 					else if (!passwordIsAcceptable){
 						canMoveToNextStage = false;
 						this.registrationError = true;
 						this.registrationErrorText = "Password must be at least 8 characters";
 					}
-					
 
 					if (canMoveToNextStage){
+						//no error
 						this.registrationError = false;
 						this.registrationErrorText ='';
 
 						axios.post(siteUrl + '/verify_first_register', {
-							stage: '1',
+							stage: '1', //sends this to server
 							email: vm.email,
 							phone: vm.phone,
 							username: vm.userName,
 
 						}).then(response=>{
+							//go to the next stage;
 							vm.registerStage = 'second';
 						}).catch(error=>{
 							vm.registrationError = true;
@@ -427,6 +432,7 @@
 								target.innerHTML = 'Sign in';
 								target.disabled = false;
 								if (this.activity_to_refer){
+									//@need_to_change: if the url for accessing pols change
 									window.location.assign(siteUrl + "/" + vm.activity_to_refer.type + "/" + vm.activity_to_refer.id + "/");
 								}
 								else{
@@ -479,6 +485,7 @@
 				formData.append('country', this.chosenCountry);
 				formData.append('subUnit', this.subUnit);
 				formData.append('categories', vm.registrationCategories);
+				
 
 				var request = new XMLHttpRequest();
 				request.open("POST", siteUrl + '/xhr_register');
@@ -492,6 +499,7 @@
 						}
 						else {
 							vm.changeButtonContent(event.target, 'Register');
+							alert("somethign went wrong");
 							event.target.disabled = false;
 						}
 					}
@@ -534,6 +542,30 @@
 		bottom: 0;
 		margin-right: 20px; 
 	}
+	.third-stage {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.final-stage {
+		align-items: center;
+		justify-content: center;
+	}
+
+	.final-stage button{
+		position: relative; 
+		margin-right: 0;
+	}
+	.proceed-container {
+		display: flex;
+		flex-direction: column;
+		justify-self: flex-end;
+	}
+	.proceed-container button {
+		align-self: flex-end;
+		position: relative;
+	}
+
 
 
 </style>

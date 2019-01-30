@@ -530,12 +530,17 @@
 			background-color: lightgrey;
 
 		}
+        #app {
+            margin-top: 30px;
+        }
 
 
             
         </style>
     </head>
     <body> 
+        {%include 'not_home_navbar_template.jinja2' %}
+
             {% if user %}
         <p style='display:none' id='userId'>{{user.id}}</p>
         <div id="app">

@@ -52,10 +52,6 @@ def get_user_details(request):
     user_dict['slug'] = user.slug
     user_dict['id'] = user.id
     user_dict['userLoggedIn'] = True if request.user else False
-    
-
-
-
     return user_dict
 
 
@@ -77,14 +73,12 @@ def get_comment_and_replies(request):
     dictt = {'c_and_s': []}
     if user_id:
         activities = request.dbsession.query(Activity).filter(Activity.user_id == user_id, (Activity.activity_type == 'comment') | (Activity.activity_type == 'reply'))
-
         for activity in activities:
             source = get_source(request, activity)
             source_id = activity.source_id
             activity = request.dbsession.query(source).filter(source.id == source_id).first()
             object_is_poll = None
             object_is_opinion = None
-
             if source == Comment:
                 try:
                     object_is_poll = activity.poll != None
@@ -215,7 +209,5 @@ def get_posts(request):
 def get_slug(request):
     user_id = request.matchdict.get('user_id', None)
     user = request.dbsession.query(User).filter(User.id == user_id).first()
-
     user_slug = user.slug
-
     return {'userSlug': user_slug}

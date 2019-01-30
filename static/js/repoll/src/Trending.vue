@@ -1,4 +1,22 @@
 <template>
+	<div class="body-container">
+		<div class="tab-container">
+			<div class="tab polls">
+				<p>Poll</p>
+			</div>
+			<div class="tab opinions">
+				<p>Opinions</p> 
+			</div>
+			<div class="tab comments">
+				<p>Comments</p>
+			</div> 
+		</div>
+		<div class="content-container">
+			<div class=""></div>
+		</div>
+
+		<h1>thjis is soo good</h1>
+	</div>
     
 </template>
 
@@ -12,26 +30,13 @@ import FeedItem from './home-components/FeedItem.vue';
 import NewOpinion from './home-components/NewOpinion.vue';
 import NewPoll from './home-components/NewPoll.vue'; 
 import Reply from './home-components/Reply.vue';
-import Respondents from './home-components/Respondents.vue'; 
 import Sidebar from './home-components/Sidebar.vue'; 
 
 	var changeButtonContent = function(button, text){
 		button.innerHTML = text;
 	}
-
-    var showSnackbar = function(text){
-		var snackbar = document.getElementById('snackbar');
-		snackbar.innerHTML = text;
-
-    	snackbar.className = "show";
-
-    // After 3 seconds, remove the show class from DIV
-    	setTimeout(function(){ snackbar.className = snackbar.className.replace("show", ""); }, 4000);
-
-	}
 	var siteUrl = 'http://localhost:6543';
 	
-
 
 export default {
     name: "Trending",
@@ -41,12 +46,9 @@ export default {
       'sidebar': Sidebar, 
       'reply': Reply, 
       'feed-item': FeedItem, 
-      'respondents-modal': Respondents, 
       'new-opinion-modal': NewOpinion, 
       'add-new-comment-modal': AddComment, 
-      'authentication-modal': AuthenticationModal, 
-      'show-new-poll-modal': NewPoll, 
-      'comments': Comments, 
+       'comments': Comments, 
     },
 
 		data(){
@@ -286,13 +288,14 @@ export default {
 	
 
 			window.onscroll = () => {
+				/**
 				var loader = document.getElementById('loadingMoreContent');
 				var scrollTop = window.pageYOffset || (document.documentElement || document.body.parentNode || document.body).scrollTop;
 				var winheight = window.innerHeight || (document.documentElement || document.body).clientHeight;
-				 var docHeight = this.getDocHeight();
-				 var trackLength = docHeight - winheight;
+				var docHeight = this.getDocHeight();
+				var trackLength = docHeight - winheight;
 				var pctScrolled = Math.floor(scrollTop/trackLength * 100); // gets percentage scrolled (ie: 80 or NaN if tracklength == 0)
-									this.loadingMoreContent = true;
+				this.loadingMoreContent = true;
 
 				if (pctScrolled == 98){
 					axios.get(siteUrl + '/get/latest').then(response=>{
@@ -302,9 +305,24 @@ export default {
 					});
 					console.log(pctScrolled);
 				}
+				**/
 			}
 		}
-
-
 }
 </script>
+
+<style scoped>
+	.container {
+		background-color: white; 
+	}
+	.tab-container {
+		display: flex; 
+		justify-content: space-between;
+		align-items: center;
+	}
+	.tab {
+		color: teal;
+		padding: 10px;
+	}
+
+</style>

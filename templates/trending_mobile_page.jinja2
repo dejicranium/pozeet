@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Home - Mobile</title>
+	<title>Pozeet - Trending</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'/>
 	<link href='https://fonts.googleapis.com/css?family=Merriweather+Sans' rel='stylesheet'/>
@@ -48,54 +48,32 @@
     align-items:center; 
     justify-content:center;
 }
+
+#container {
+	position: absolute;
+	top: 50px;
+}
+.body-container {
+	padding-top: 50px; 
+}
 	</style>
 </head>
 
 
 
 <body>
+	<div id="container">
+	<!--BEGINNING OF THE ACTUAL BODY -->
+		{%include 'not_home_navbar_template.jinja2' %}
+		<div class='body-container'>
+			<div style='width:20px; height:auto; margin:0 auto;'>
+			</div>
 
-<div id="container">
-
-
-
-<!--BEGINNING OF THE ACTUAL BODY -->
-
-
-
-	{%include 'not_home_navbar_template.jinja2' %}
-
-
-
-
-	<div class='body-container'>
-
-		<div style='width:20px; height:auto; margin:0 auto;'>
-		<img src="{{request.static_url('repoll:static/rename.svg')}}" style='margin:0 auto; width:20px;height:20px;' v-show='loading' />
+			<script src='/static/js/repoll/dist/trending_build.js'></script>
 		</div>
+		<div id='snackbar'></div>
 
-		<script src='/static/js/repoll/dist/trending_build.js'></script>
 	</div>
-	<div id='snackbar'></div>
-
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-			<!--
-
-
-
- -->
 
 </body>
 

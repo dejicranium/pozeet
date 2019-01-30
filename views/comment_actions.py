@@ -14,7 +14,7 @@ from ..utils.compile_util import (
                                 compile_reply_details,
                                 )
 
-from greggo.storage.redis.trending_storage import TrendingCommentsStorage
+from greggo.storage.redis.trending_storage import TrendingCommentsStorage, TrendingPollsStorage
 from repoll.services.notification_service import *
 from repoll.services.activity_service import ActivityService
 
@@ -28,12 +28,10 @@ def compile_comments(request, comment):
         is_poll_comment = comment.poll_id is not None
     except:
         print("s")
-    
     try:
         is_opinion_comment = comment.opinion_id is not None
     except:
         print("s")
-
     if request.user:
         user = request.dbsession.query(User).filter(User.id == request.user.id).first()
     comment_dictt['id'] = comment.id
@@ -70,50 +68,21 @@ def compile_comments(request, comment):
 def view_comments(request):
     poll_id = request.matchdict.get('poll_id', None)
     option_id = request.params.get('option_id', None)
-    #start = request.params.get('start', None)
-    #end = request.params.get('end', None)
     dictt = {'comments':[]}
-
-
-    #if start == None and end == None: 
-     #   start = 0
-      #  end = 15
-    #else: 
-     #   start = int(start)
-      #  end = int(end)
-
     if option_id:
         comments = request.dbsession.query(Comment).filter(Comment.poll_id==poll_id)[start:end]
         for comment in comments:
             comment_dictt = compile_comments(request, comment)
             dictt['comments'].append(comment_dictt)
         return dictt
-
     elif poll_id: 
         comments = request.dbsession.query(Comment).filter(Comment.poll_id==poll_id)
         for comment in comments: 
             comment_dictt = compile_comments(request, comment)
             dictt['comments'].append(comment_dictt)
-
         return dictt
     else:
         return {'nothing': 'nothing'}
-
-
-"""
-@view_config(route_name='view_option_comments', renderer='json')
-def get_option_comments(request):
-	option_id = request.params.get('option_id', None)
-	dictt = {'comments': []}
-
-	if option_id:
-	    comments = request.dbsession.query(Comment).filter(Comment.option_id == option_id)
-        for comment in comments: 
-            dictt['comments'].append(compile_comments(request, comment))
-
-	return dictt
-
-"""
 
 
 @view_config(route_name='add_comment', renderer='json')
@@ -126,7 +95,6 @@ def add_comment(request):
     
     user = request.dbsession.query(User).filter(User.id==request.user.id).first()
     option = request.dbsession.query(Option).filter(Option.id == option_id)
-    
     try:
         if comment:
             try:
@@ -135,45 +103,35 @@ def add_comment(request):
                 new_comment.commenter_id = request.user.id
                 new_comment.comment = comment
                 new_comment.option_id = option_id
-
                 if poll_id:
                     new_comment.poll_id = poll_id
                 elif opinion_id:
                     new_comment.opinion_id = opinion_id
-
-
                 #create conversation
                 conversation = Conversation()
                 request.dbsession.add(conversation)
                 request.dbsession.flush()
-
                 new_comment.conversation_id = conversation.id
-
                 request.dbsession.add(new_comment)
                 request.dbsession.flush()
             except:
                 return {'problem': 'problem is from here'}
 
-
-            #get relevant info from db
             if poll_id:
-                
                 poll = request.dbsession.query(Poll).filter(Poll.id == poll_id)
                 comment = request.dbsession.query(Comment).filter(Comment.id == new_comment.id)
-
-
+                #add vote
                 new_user_vote = PollVotes()
                 new_user_vote.user_id = user.id
                 new_user_vote.poll_id = poll_id
-
                 #see whether it fits in a set of trends
                 t = TrendingCommentsStorage()
                 t.add_comment(comment.first())
 
-            #store the vote
+                #store the vote
                 request.dbsession.add(new_user_vote)
                 request.dbsession.flush()
-                
+                #add as a new activity
                 new_activity = Activity()
                 new_activity.user_id = request.user.id
                 new_activity.activity_type = 'comment'
@@ -181,25 +139,22 @@ def add_comment(request):
                 new_activity.object_id = poll_id
                 new_activity.object_owner_id = new_comment.added_by.id
                 new_activity.object_name = 'poll'
-
                 activity_service =  ActivityService(request, 'comment', request.user, new_comment, poll.first())
                 activity_service.create_new_activity()
-
-                new_activity = activity_service.get_activity()
-                #notification
+                #create a notification
+                new_activity = activity_service.get_activity() #get back the just created activity as an object                
                 user_id = new_activity.object_owner_id
                 sender_id = request.user.id
                 activity_type = new_activity.activity_type
                 source = new_comment
                 _object = poll.first()
-
                 notification = NotificationService(request, user_id, sender_id, activity_type, source, _object)
                 notification.create_new_notification()
                 #increment necessary details
                 poll.update({"num_of_votes" : (Poll.num_of_votes + 1)})
                 option.update({"num_of_votes" : (Option.num_of_votes + 1)})
 
-            #save user's age in redis voters age storage
+                #save user's age in redis voters age storage
                 user_age = user.age
                 redis_store = PollVotersAgeStorage(poll_id, REDIS_SERVER)
                 redis_store.increment_age(str(user_age) + '::' + str(option_id))
@@ -211,11 +166,12 @@ def add_comment(request):
                         redis_store.increment_gender_votes(str('M') + '::' + str(option_id))
                     else:
                         redis_store.increment_gender_votes(str('F') + '::' + str(option_id))
-
+               
+                #add the poll to the trends again
+                p = TrendingPollsStorage()
+                p.add_poll(poll.first())
 
                 transaction.commit()
-
-                
 
             else: 
                 opinion = request.dbsession.query(Opinion).filter(Opinion.id == opinion_id)
@@ -260,8 +216,6 @@ def add_comment(request):
                         redis_store.increment_gender_votes(str('M') + '::' + str(option_id))
                     else:
                         redis_store.increment_gender_votes(str('F') + '::' + str(option_id))
-
-            
             
                 transaction.commit()
         else:
@@ -331,11 +285,9 @@ def agree_with_comment(request):
     comment = request.dbsession.query(Comment).filter(Comment.id == comment_id)
 
     #if we are aggreeing to an opinion
-    
     if comment_id and user_id and option_id: 
         new_agree = Agrees(comment_id=comment_id, user_id=user_id, option_id=option_id)
-        request.dbsession.add(new_agree)
-    
+        request.dbsession.add(new_agree)    
     try:
         if poll_id:
         #store the vote 
@@ -350,9 +302,8 @@ def agree_with_comment(request):
        #increment necessary details
             poll.update({"num_of_votes" : (Poll.num_of_votes + 1)})
             option.update({"num_of_votes" : (Option.num_of_votes + 1)})
+            comment.update({'num_of_votes': (Comment.num_of_votes + 1)})
             comment.update({'num_of_agrees': (Comment.num_of_agrees + 1)})
-
-
         #see whether there's space for the comment in trends
             t = TrendingCommentsStorage()
             t.add_comment(comment.first())
@@ -370,7 +321,6 @@ def agree_with_comment(request):
                     redis_store.increment_gender_votes(str('M') + '::' + str(option_id))
                 else:
                     redis_store.increment_gender_votes(str('F') + '::' + str(option_id))
-
             transaction.commit()
 
         elif opinion_id:
@@ -385,7 +335,7 @@ def agree_with_comment(request):
        #increment necessary details
             opinion.update({"num_of_votes" : (Opinion.num_of_votes + 1)})
             option.update({"num_of_votes" : (Option.num_of_votes + 1)})
-            comment.update({'num_of_agrees': (Comment.num_of_agrees + 1)})
+            comment.update({'num_of_votes': (Comment.num_of_votes + 1)})
 
 
         #see whether there's space for the comment in trends

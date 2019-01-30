@@ -14,8 +14,6 @@ def main(global_config, **settings):
     config.include('.routes')
     config.include('.security')
     config.include('..greggo')
-
     config.add_static_view('static', path='repoll:static')
-
     config.scan()
     return config.make_wsgi_app()

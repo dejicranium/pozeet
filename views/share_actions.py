@@ -123,3 +123,17 @@ def share(request):
 
         new_notification = NotificationService(request, user_id, sender_id, activity_type, source, _object)
         new_notification.create_new_notification()
+
+
+@view_config(route_name="delete_share", renderer="json")
+def delete_share(request):
+    #delete the share entity
+    share_id = request.json_body.get("share_id", None)
+    if share_id: 
+        share = request.dbsession.query(Share).filer(Share.id==share_id).first()
+        request.dbsession.delete(share)
+        
+        #delete the share activity
+        share_activity = request.dbsession.query(Activity).filter(Activity.activity_type =="share", Activity.source_id==share_id).first()
+        request.dbsession.delete(share_activity)
+        transaction.commit()

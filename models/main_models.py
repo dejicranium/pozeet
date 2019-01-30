@@ -556,7 +556,9 @@ class Comment(Base):
     num_of_shares = Column(Integer, default=0)
     num_of_replies = Column(Integer, default=0)
     num_of_likes = Column(Integer, default=0)
+    num_of_votes = Column(Integer, default=0)
     num_of_agrees = Column(Integer, default=0)
+
     
 
     @property

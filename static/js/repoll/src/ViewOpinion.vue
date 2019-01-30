@@ -1,10 +1,10 @@
 <template>
-    <div>
-    <div class='body-container' v-if='!loading'>
-        <div class="feed-container">
-			<div class="feed-card">
+    <div class="body-container">
+    	<div>
+        	<div class="feed-container">
+				<div class="feed-card">
 					<div class="avatar">
-                         <img v-if='!poll.userPic' src="https://www.w3schools.com/howto/img_avatar.png"/>
+                         <img style='color:darkgrey; font-size:12px;' v-if='!poll.userPic' src="https://www.w3schools.com/howto/img_avatar.png"/>
 						 <img v-else :src='poll.userPic'>
                     </div>
 				
@@ -13,10 +13,14 @@
                         <div class="author-details">
                             <p class="name" style='color;black; font-weight:bold; font-size:12px;'>{{poll.userName}}</p>
                             <p class="username"></p>
-							<p class='time-added' style='color:darkgrey; font-size:12px;'>{{poll.timeAdded}}<p>
+							<p class='time-added' style='color:darkgrey; font-size: 12px'>{{poll.timeAddedd}}</p>
                         </div>
 
                         <p class="comment" style='white-space:; font-size:13px; margin-bottom:5px;'>{{poll.opinion}}</p>
+						<div style='display:flex; flex-direction:row;'>
+							<img id='opinionContextImage' v-for='image in poll.contextImage' :image='image' :src='image.imgLink' style='max-width:60%; max-height:200px; border-radius:5px;'>
+
+						</div>
 						<p class='votes'>{{poll.totalVotes}} reactions</p>
 
 
@@ -26,6 +30,7 @@
 						<button  @click='openBreakDownWindow'><i class="fas fa-chart-pie button-icon"></i>View Breakdown</button>
 
 					</div>
+			
 
             </div>
 
@@ -51,23 +56,15 @@
                 </div>
 
                 <div class="tab" v-for='option in poll.options'
-					
 					 :option='option'
 					 :id='option.id'
-					 @click='makeTabActive(option.id)'
-					 class="tab">
-					 
+					 @click='makeTabActive(option.id)'>
                     <p>{{option.option}}</p>
                 </div>
-
-
-
-
             </div>
 
             <!--COMMENT COMPONENT-->
 			<comment v-for='comment in sortedComments' @change_can_agree_state='changeCanAgreeWithCommentsState' :comment='comment' :replies='replies' :can_agree_to_comments='canAgreeToComments'></comment>
-
 
 		</div>
 	</div>
@@ -78,7 +75,6 @@
 
 
 <script>
-
     var siteUrl = "http://localhost:6543";
     import axios from 'axios';
     import Comment from './home-components/Comment.vue';
@@ -247,10 +243,7 @@
 			}
 			request.send(formData);
 
-			
-
         	},
-
 
 		},
 		computed:{
@@ -295,7 +288,7 @@
 				vm.changePollData('imageInfo', response.data.imageInfo);
 				vm.changePollData('timeAdded', response.data.timeAdded);
 				vm.changePollData('userIsFollowing', response.data.userIsFollowing);
-
+				vm.changePollData('contextImage', response.data.contextImage);
 
 				//should users be allowed to agree to a comment?
 				//it all starts from knowing whether they have voted before.

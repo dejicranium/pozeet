@@ -9,7 +9,7 @@ def includeme(config):
     config.add_route('home', '/')
     
     config.add_route('register', '/register')
-    config.add_route('xhr_register', "/xhr_register/refer_to={type:\w+}/{type_id:\d+}")
+    config.add_route('xhr_register', "/xhr_register")
 
 
     #login routes
@@ -49,6 +49,7 @@ def includeme(config):
     #testing purposes
     config.add_route('get_num_of_votes', '/getvotesfor/{poll_id:\d+}')
     config.add_route('show_categories', '/show/categories')
+    config.add_route("unsubscribe_from_category", "/unsubscribe/category/{category_id:\d+}")
     config.add_route('subscribe_to_category', '/subscribe/category/{category_id:\d+}')
     config.add_route('show_subscriptions', '/show_subscriptions')
     config.add_route('show_subscribers', '/subscribers/{category_id:\d+}')
@@ -60,7 +61,7 @@ def includeme(config):
     config.add_route('get_user_details', '/user/details/{user_id:\d+}')
     config.add_route('see_polls', '/mypolls')
     config.add_route('test_mobile', '/test/mobile')
-    config.add_route('get_latest_posts', '/get/latest')
+    config.add_route('get_latest_posts', '/get/latest/')
     config.add_route('mobile_feed', '/mobile/feed')
     config.add_route('activities', '/activities')
 
@@ -79,6 +80,7 @@ def includeme(config):
     config.add_route('create_opinion', '/new/opinion')
     config.add_route('add_cat', '/add/categories')
     config.add_route('share', '/share/')
+    config.add_route('delete_share', '/delete_share')
 
     config.add_route('get_voters_on_poll', '/voters/{poll_id:\d+}')
     config.add_route('get_user_polls', '/polls/user_id={user_id:\d+}')
@@ -105,22 +107,23 @@ def includeme(config):
 
     config.add_route('view_conversation_page', '/view_conversation/conversation_id={conversation_id:\d+}/reply_id={reply_id:\d+}')
     config.add_route('get_conversation', '/get_conversation/{conversation_id:\d+}/{reply_id:\d+}/')
-
     config.add_route('opinions_voted_in_page', '/opinions_voted_in')
     config.add_route('get_opinions_voted_in', '/get_opinions_voted_in')
-
+    
     config.add_route('view_comment_page', '/view_comment/{comment_id:\d+}')
     config.add_route('get_comment', '/get_comment/{comment_id:\d+}')
-
-
     config.add_route('polls_voted_in_page', '/polls_voted_in/')
     config.add_route('get_polls_voted_in', '/get_polls_voted_in')
-
     config.add_route('get_comment_replies', '/replies/comment_id={comment_id:\d+}')
     config.add_route('get_reply_replies', '/replies/reply_id={reply_id:\d+}')
-
     config.add_route('view_reply_page', '/view_reply/{reply:\d+}')
-
     config.add_route('get_locations', '/get-locations')
-
     config.add_route('insert', '/insert/{id}')
+
+    config.add_route('number_of_activities', "/num/act")
+
+    config.add_route('get_trending_polls', '/trending_polls/')
+    config.add_route('get_trending_opinions', '/trending_opinions/')
+    config.add_route('get_trending_comments', '/trending_comments/')
+
+    config.add_route('index', '/index')

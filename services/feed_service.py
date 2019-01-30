@@ -8,14 +8,14 @@ from ..utils.compile_util import (
                                     compile_comment_details,
                                     compile_reply_details,
                                     compile_comment_details,
-
-)
+                                    )
 from greggo.storage.redis.trending_storage import *
 from greggo.storage.redis.user_followings_storage import FollowingsManager
 from .metrics_service import *
 from .activity_service import get_latest_activities
 from greggo.feed_managers.base import FeedManager
-
+from .paginate import Paginate
+from paginate_sqlalchemy import SqlalchemyOrmPage
 
 def user_is_following( user1_id, user2_id):
     return FollowingsManager.user_is_following(user1_id, user2_id)
@@ -26,7 +26,7 @@ def return_polls_results_seen_by_user(request, user):
         seen_results.append(int(poll.poll_id))
     return seen_results
 
-def get_activities_if_authenticated(request, user, already_shown):
+def get_activities_if_authenticated(request, user, page):
     user_full_name = user.full_name
     user_pic = user.profile_picture
     dictt = {'user_logged_in': True, 'userName': user_full_name, 'userPic': user_pic, 'activities': []}
@@ -39,11 +39,13 @@ def get_activities_if_authenticated(request, user, already_shown):
 
     activities = FeedManager(user.id).get_all_feeds(user_categories)    
     #activities = get_latest_activities(request, user.id, already_shown)
-    activities = request.dbsession.query(Activity).filter(Activity.id.in_(activities)).all() 
+    activities = request.dbsession.query(Activity).filter(Activity.id.in_(activities))
+    paginator = SqlalchemyOrmPage(activities, page=page, items_per_page=10)
     #activities = random.sample(set(activities), len(activities))
-    activities = activities[::-1]
+    #activities = activities[::-1]
 
-    for activity in activities:
+    
+    for activity in paginator.items:
         source = get_source(request, activity)
         source_id = activity.source_id
 
@@ -60,6 +62,7 @@ def get_activities_if_authenticated(request, user, already_shown):
                 'id': a.id,
                 'userId': a.added_by.id,
                 'userName': a.added_by.full_name,
+                'username': a.added_by.username,
                 'userInitials': a.added_by.initials,
                 'userPic': a.added_by.profile_picture,
                 'userSlug': a.added_by.slug,
@@ -114,6 +117,7 @@ def get_activities_if_authenticated(request, user, already_shown):
                 'id': a.id,
                 'userId': a.added_by.id,
                 'userSlug': a.added_by.slug,
+                'username': a.added_by.username,
                 'commenterInitals': a.added_by.initials,
                 'commenter': a.added_by.full_name,
                 'comment': a.comment,
@@ -133,12 +137,12 @@ def get_activities_if_authenticated(request, user, already_shown):
                     'question': a.poll.question,
                     'slug': a.poll.slug,
                     'timeAdded': a.poll.time_added,
-
                 }
             if object_is_opinion:
                 comment_dictt['opinion'] = {
                     'id': a.opinion.id,
                     'userName': a.opinion.added_by.full_name,
+                    'username': a.opinion.added_by.username,
                     'opinion': a.opinion.opinion,
                     'timeAdded': a.opinion.time_added,
                 }
@@ -154,6 +158,7 @@ def get_activities_if_authenticated(request, user, already_shown):
                 'type': 'opinion',
                 'userId': a.added_by.id,
                 'userSlug': a.added_by.slug,
+                'username': a.added_by.username,
                 'userName': a.added_by.full_name,
                 'userPic': a.added_by.profile_picture,
                 'opinion': a.opinion,
@@ -205,11 +210,6 @@ def get_activities_if_authenticated(request, user, already_shown):
             elif object_is_reply: 
                 reply_dictt = compile_reply_details(request, a, user)
                 dictt['activities'].append(reply_dictt)
-
-            
-
-
-
 
         elif source == Share:
             object_is_poll = a.poll != None
@@ -370,6 +370,7 @@ def get_activities_if_not_autheticated(request):
     
     act_dictt = {'user_logged_in': False, 'activities': []}
 
+    """
     polls = TrendingPollsStorage().get_polls()
     comments = TrendingCommentsStorage().get_comments()
     opinions = TrendingOpinionsStorage().get_opinions()
@@ -484,5 +485,5 @@ def get_activities_if_not_autheticated(request):
        # }
 
         #act_dictt['activities'].append(opinion_dictt)
-
+    """
     return act_dictt

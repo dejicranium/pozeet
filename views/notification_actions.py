@@ -15,7 +15,7 @@ def user_followings(request, user_id):
 
 
 @view_config(route_name='notifications_page', renderer='../templates/notifications_mobile.jinja2')
-def get_notifications(request):
+def notifications_page(request):
     if request.user:
         user = request.dbsession.query(User).filter(User.id==request.user.id).first()
         return {'user': user, 'user_id': user.id}

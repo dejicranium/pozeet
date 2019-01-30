@@ -153,6 +153,7 @@ def create_question(request):
 
 @view_config(route_name='create_question', renderer='json')
 def create_poll(request):
+    option_labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
     body = request.params
     question =  body.get('question', None)
     poser = request.user.id
@@ -166,12 +167,15 @@ def create_poll(request):
     categories = body.get('categories', None)
     context_image = body.get('context-image', None)
 
-
     options_list = []
     poll_categories_list = []
 
     if categories: 
         categories = categories.split(',')
+    else:
+        #quickly return an error
+        request.response.status = '400'
+        return {'status': 'No category chosen'}
     if options:
         options = options.split(',')
 
@@ -230,7 +234,11 @@ def create_poll(request):
                 uploaded_image_link = uploaded_image['secure_url']
                     
                 new_option = Option()
-                new_option.title = option_image_titles[i]
+                #if the option has no caption, automatically default it to alphabet
+                if option_image_titles[i] == "":
+                    new_option.title = option_labels[i]
+                else:
+                    new_option.title = option_image_titles[i]
                 new_option.image_link  = uploaded_image_link
 
                 options_list.append(new_option)
@@ -505,18 +513,14 @@ def get_voters_on_poll(request):
     poll_id = request.matchdict.get('poll_id', None)
     start_index = request.matchdict.get('s', None)
     end_index = request.matchdict.get('e', None)
-    
-
     if not start_index and end_index: 
         start_index = 0
         end_index = 30
-
     if poll_id: 
         user_votes = request.dbsession.query(PollVotes).filter(PollVotes.poll_id==poll_id)[start_index:end_index]
-    
     for vote in user_votes: 
         user_dict = {}
-        user_dict['userFullName'] = vote.added_by.full_name
+        user_dict['userName'] = vote.added_by.full_name
         user_dict['username'] = vote.added_by.username
         user_dict['userPic'] = vote.added_by.profile_picture
         voters.append(user_dict)

@@ -33,6 +33,7 @@ import uuid
 from ..services.auth_service import add_image_description
 from ..utils.compile_util import return_categories_subscribed_to
 #@view_config()
+
 @view_config(route_name='create_opinion', renderer='json')
 def create_opinion(request):
     options = []
@@ -56,6 +57,7 @@ def create_opinion(request):
             context_image.image_link = image_link
             context_image.opinion_id = new_opinion.id
             request.dbsession.add(context_image)
+            transaction.commit()
 
     new_option1= Option()
     new_option1.title = "Agree"
@@ -65,15 +67,13 @@ def create_opinion(request):
     new_option2.title = "Disagree"
     options.append(new_option2)
 
-
     new_opinion.options = options
     request.dbsession.add(new_opinion)
     request.dbsession.flush()
 
-
     #add opinion to trends 
-    #trend = TrendingOpinionsStorage()
-    #trend.add_opinion(new_opinion)
+    trend = TrendingOpinionsStorage()
+    trend.add_opinion(new_opinion)
     
     #get the categories that user has subscribed to
     subscriptions = return_categories_subscribed_to(request, user)
@@ -139,8 +139,7 @@ def get_metrics(request):
 def view_opinion_page(request):
     opinion_id = request.matchdict.get('opinion_id')
     opinion = request.dbsession.query(Opinion).filter(Opinion.id==opinion_id).first()
-
-    return {'opinion_id': opinion_id}    
+    return {"opinion": opinion}    
 
 @view_config(route_name='view_opinion', renderer='json')
 def view_opinion(request):

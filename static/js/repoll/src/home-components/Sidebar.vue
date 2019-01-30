@@ -28,10 +28,10 @@
 					<p @click="openOpinionsVotedIn">Opinions Voted In</p>
 					
 					<p @click='showSubscriptions = !showSubscriptions' :class="[showSubscriptions? sidebarContentSelectedClass : '']">My Subscriptions </p>
-						<li v-if='showSubscriptions' v-for='subscription in sortedSubscriptionsList'>{{subscription.categoryName}} <i class="fas fa-minus" @click='unsubscribeFromCategory(subscription.categoryId)'></i></li>
+						<li v-if='showSubscriptions' v-for='subscription in sortedSubscriptionsList'  @click='goToCategoryPage(subscription.categoryId)'>{{subscription.categoryName}} <i class="fas fa-minus" @click='goToCategoryPage(subscription.categoryId)'></i></li>
 					
 					<p @click='showCategories = !showCategories' :class="[showCategories? sidebarContentSelectedClass : '']">Other Categories</p>
-						<li v-if='showCategories' v-for='category in categories' @click='goToCategoryPage(category.categoryId)'>{{category.categoryName}}</i></li>
+						<li v-if='showCategories' v-for='category in categories' @click='goToCategoryPage(category.categoryId)'>{{category.categoryName}}</li>
 					
 				</div>
 
@@ -69,7 +69,7 @@
 		methods: {
 
 			closeModal(){
-				this.$emit('close_modal', true);
+				this.$emit('close_modal', false);
 
 			},
 			openOpinionsVotedIn(){

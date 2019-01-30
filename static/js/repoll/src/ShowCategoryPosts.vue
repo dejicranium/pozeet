@@ -1,7 +1,9 @@
 <template>
         <div id="sub-container">
 			<div style="margin-bottom:50px;">
-				<button style='background-color:teal; color:white; border:none; margin-bottom: 10px; padding: 10px; position:absolute; right:0;'>Subscribe</button>
+				<button style='background-color:teal; color:white; border:none; margin-bottom: 10px; padding: 10px; position:absolute; right:0;' v-if="!categoryAlreadySubscribedTo" @click="subscribeToCategory">Subscribe</button>
+				<button style='background-color:teal; color:white; border:none; margin-bottom: 10px; padding: 10px; position:absolute; right:0;' v-else @click="unsubscribeFromCategory">Unsubscribe</button>
+
 			</div>
 
 
@@ -79,6 +81,8 @@ export default {
 				notifications: [],
 				categories: [],
 				noOfNewNotifications: 0,
+			
+				categoryAlreadySubscribedTo: false,
 
 				userLoggedIn: false,
 				userName: '',
@@ -266,22 +270,28 @@ export default {
 				this.showRespondentsModal = true;
 			},
 
-			subscribeToCategory(categoryId){
+			subscribeToCategory(){
+				/**
 				var category = this.categories.filter(c=> c.categoryId==categoryId);
 				var category = category[0]; //because the above returns a list of one object;
 				var categoryIndex = this.categories.indexOf(category); //we need the index of the category so we can remove it from list of categories
 
 				this.subscriptions.push(category);
-				this.categories.splice(categoryIndex, 1);
+				this.categories.splice(categoryIndex, 1);**/
+				axios.post(siteUrl + "/subscribe/category/" + categoryId).then(response=>{
+					this.categoryAlreadySubscribedTo = true;
+
+					window.location.reload();
+				});
+
+				
 			},
 
-			unsubscribeFromCategory(categoryId){
-				var category = this.subscriptions.filter(c=> c.categoryId==categoryId);
-				var category = category[0]; //because the above returns a list of one object;
-				var categoryIndex = this.subscriptions.indexOf(category); //we need the index of the category so we can remove it from list of categories
+			unsubscribeFromCategory(){
+				axios.post(siteUrl + "/unsubscribe/category/" + categoryId).then(response=>{
+					this.categoryAlreadySubscribedTo = false;
 
-				this.subscriptions.splice(categoryIndex, 1);
-				this.categories.push(category);
+				});
 			},
 
 			goToCategoryPage(categoryId){
@@ -338,7 +348,8 @@ export default {
 			this.activities = response_list;
 			this.userName = response.data.userName;
 			this.userLoggedIn = response.data.userLoggedIn; 
-			
+			this.categoryAlreadySubscribedTo = response.data.userIsSubscribed; 
+
 
 			
 			});
@@ -350,16 +361,7 @@ export default {
 			//axios.get(siteUrl + '/show_subscriptions').then(response => {
 			//	this.subscriptions = response.data.subscriptions;
 			//});
-			axios.get(siteUrl + '/user/details/' + this.user.id).then(response => {
-				this.changeUserData('id', response.data.id);
-				this.changeUserData('slug', response.data.slug);
-				this.changeUserData('userPic', response.data.userPic);
-				this.changeUserData('fullname', response.data.userName);
-				this.changeUserData('userPic', response.data.userPic);
-				this.changeUserData('num_of_followed', response.data.num_of_followed);
-				this.changeUserData('num_of_followers', response.data.num_of_followers);
-
-			});
+			
 
 		},
 

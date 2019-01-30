@@ -12,7 +12,7 @@
 		<meta property="og:description" content="Read people's opinion on this"/>
 	{% endif %}
 
-	<meta property="og:url" content="{{request.route_url(view_poll, poll_id='poll.id'}}"/>
+	<meta property="og:url" content="{{request.route_url('view_poll', poll_id=poll.id)}}"/>
 	
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous"/>
 	<style type="text/css">
@@ -528,6 +528,10 @@
     justify-content:center;
 }
 
+.hasShared {
+	color: teal;
+	background-color: whitesmoke;
+}
 
 
 
